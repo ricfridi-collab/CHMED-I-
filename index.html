@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>أكاديمية الدكتور شويدرة | التربية الإسلامية</title>
+    <title>bem 2026 | التربية الإسلامية</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
@@ -233,8 +233,8 @@
             <div style="margin-bottom: 20px; filter: drop-shadow(0 0 10px rgba(212,175,55,0.5));">
                 <svg width="80" height="80" viewBox="0 0 24 24" fill="#d4af37"><path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6-9h-1V6a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zM9 6a3 3 0 1 1 6 0v2H9V6z"/></svg>
             </div>
-            <h2 class="login-title">أكاديمية الدكتور شويدرة</h2>
-            <p class="login-subtitle">نظام التربية الإسلامية الرابع متوسط</p>
+            <h2 class="login-title">ادخل كود التفعيل </h2>
+            <p class="login-subtitle"> التربية الإسلامية الرابع متوسط</p>
             
             <input type="text" id="access-code" class="code-input" placeholder="أدخل كود التفعيل" maxlength="15">
             <button id="btn-unlock" class="btn-verify" onclick="verifyCode()">تحقق ودخول</button>
@@ -399,9 +399,10 @@
 
     <script>
         // ==========================================
-        // 1. منطق الحماية
+        // 1. منطق الحماية (محدث ليدعم الكتابة في الشيت)
         // ==========================================
-        const API_URL = 'https://sheetdb.io/api/v1/q69au3ajbl4o9/search?code=';
+        // --- تأكد من صحة هذا الرابط ---
+        const API_BASE_URL = 'https://sheetdb.io/api/v1/q69au3ajbl4o9'; 
 
         function clearActivation() {
             localStorage.removeItem('bem_activated');
@@ -427,7 +428,7 @@
             }
         };
 
-        // === الدالة المعدلة لمنطق التحقق ===
+        // === الدالة المعدلة للتحقق مع التحديث الفوري ===
         async function verifyCode() {
             const input = document.getElementById('access-code').value.trim();
             const btn = document.getElementById('btn-unlock');
@@ -441,8 +442,9 @@
             msg.textContent = "جاري الاتصال بالسيرفر...";
 
             try {
-                const response = await fetch(`${API_URL}${input}`);
-                if (!response.ok) throw new Error("خطأ في الاتصال");
+                // 1. البحث عن الكود (قراءة)
+                const response = await fetch(`${API_BASE_URL}/search?code=${input}`);
+                if (!response.ok) throw new Error("خطأ في الاتصال بالسيرفر");
                 const data = await response.json();
 
                 // إذا لم يتم العثور على الكود
@@ -454,14 +456,49 @@
                 const row = data[0];
 
                 // التحقق من عمود status
-                // إذا كان status فارغاً أو غير موجود، نفترض أن الكود جديد (لم يستخدم)
-                // إذا كان status يحتوي على نص (مثلاً 'used')، نمنعه
                 if (row.status && row.status.trim() !== "") {
-                    throw new Error("تم استخدام هذا الكود من قبل");
+                    // الكود مستخدم مسبقاً، نتحقق هل هو على نفس الجهاز؟
+                    if (row.device_id && row.device_id !== getDeviceFingerprint()) {
+                        throw new Error("تم استخدام هذا الكود على جهاز آخر مسبقاً");
+                    }
+                    // إذا كان نفس الجهاز، ندخله مباشرة
+                    msg.style.color = "var(--success)";
+                    msg.textContent = "مرحباً بعودتك (تم التفعيل مسبقاً)";
+                    localStorage.setItem('bem_activated', 'true');
+                    setTimeout(() => {
+                        document.getElementById('protection-screen').classList.add('hidden');
+                        btn.disabled = false; 
+                        btn.textContent = "تحقق ودخول";
+                    }, 1000);
+                    return;
                 }
 
-                // التحقق من device_id (اختياري إذا كنت تريد تقييد الكود لجهاز محدد)
-                // هنا سنكتفي بالتحقق من status والتفعيل المحلي
+                // الكود جديد ومتوفر -> نقوم بتحديث الشيت (كتابة)
+                // نحتاج معرف الصف (id) للتعديل عليه. SheetDB يعطي id افتراضي للصفوف (1, 2, 3...)
+                const rowId = row.id; 
+                
+                const updateData = {
+                    data: [
+                        {
+                            status: 'used',                     // تغيير الحالة إلى مستخدم
+                            device_id: getDeviceFingerprint()    // حفظ رقم الجهاز
+                        }
+                    ]
+                };
+
+                // إرسال طلب التعديل (PATCH)
+                const updateResponse = await fetch(`${API_BASE_URL}/id/${rowId}`, {
+                    method: 'PATCH', 
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (!updateResponse.ok) {
+                    throw new Error("فشل تحديث البيانات، يرجى المحاولة لاحقاً");
+                }
 
                 // التفعيل الناجح
                 localStorage.setItem('bem_activation_code', input);
