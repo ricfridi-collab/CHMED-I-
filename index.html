@@ -91,27 +91,54 @@
         }
         .hidden { display: none !important; }
 
-        /* --- شاشة التفعيل --- */
-        #activation-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 6, 23, 0.98);
-            z-index: 3000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
+        /* --- زر إعادة التعيين (للأغراض التقنية) --- */
+        .reset-btn-container { margin-top: 30px; text-align: center; }
+        .reset-btn {
+            background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger);
+            color: var(--danger); padding: 5px 10px; font-size: 0.7rem; font-family: 'Cairo';
+            border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block;
         }
-        .activation-box {
-            background: rgba(255,255,255,0.05); border: 2px solid var(--gold); padding: 30px;
-            border-radius: 15px; width: 90%; max-width: 350px; text-align: center;
-            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); backdrop-filter: blur(10px);
+        .reset-btn:hover { background: var(--danger); color: white; }
+
+        /* --- شاشة الحماية (Protection Screen) --- */
+        #protection-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000000; /* أسود صريح لضمان التغطية */
+            z-index: 99999; /* رقم أعلى جداً */
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background-image: radial-gradient(circle at center, #1e293b 0%, #000000 100%);
+        }
+        .login-card {
+            background: rgba(255,255,255,0.03); border: 2px solid var(--gold);
+            padding: 40px 30px; border-radius: 20px; width: 90%; max-width: 380px;
+            text-align: center; box-shadow: 0 0 40px rgba(212, 175, 55, 0.15);
+            backdrop-filter: blur(10px);
+        }
+        .login-title {
+            color: var(--gold); font-family: 'Cairo'; font-size: 1.5rem; margin-top: 0;
+            margin-bottom: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .login-subtitle {
+            color: #94a3b8; font-family: 'Cairo'; font-size: 0.9rem; margin-bottom: 25px;
         }
         .code-input {
-            width: 100%; padding: 12px; background: #000; border: 1px solid var(--gold-dim);
-            color: var(--gold); font-size: 1.2rem; text-align: center; border-radius: 8px;
-            margin-bottom: 15px; font-family: 'Cairo', sans-serif; letter-spacing: 2px; direction: ltr; outline: none;
+            width: 100%; padding: 15px; background: #0f172a; border: 1px solid #334155;
+            color: white; font-size: 1.2rem; text-align: center; border-radius: 10px;
+            margin-bottom: 20px; font-family: 'Cairo'; letter-spacing: 2px; outline: none;
+            box-sizing: border-box; transition: 0.3s;
         }
-        .activate-btn {
-            background: var(--gold); color: #000; border: none; padding: 12px;
-            font-weight: bold; cursor: pointer; width: 100%; font-family: 'Cairo', sans-serif;
-            transition: 0.2s; border-radius: 8px; font-size: 1.1rem;
+        .code-input:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(212,175,55,0.2); }
+        .btn-verify {
+            background: linear-gradient(45deg, var(--gold), #b4932a); color: #020617;
+            border: none; padding: 14px; font-weight: 900; cursor: pointer;
+            width: 100%; font-family: 'Cairo'; border-radius: 10px; font-size: 1.1rem;
+            transition: transform 0.2s;
         }
-        .activate-btn:disabled { background: #555; cursor: not-allowed; }
+        .btn-verify:active { transform: scale(0.98); }
+        .btn-verify:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
+        .status-msg {
+            margin-top: 15px; font-family: 'Cairo'; font-size: 0.9rem; min-height: 1.5em;
+        }
 
         /* =========================================
            تنسيقات الكتاب المدرسي (Book Interface)
@@ -240,15 +267,21 @@
 </head>
 <body>
 
-    <!-- شاشة التفعيل -->
-    <section id="activation-screen">
-        <div class="activation-box">
-            <h2 style="font-family: 'Cairo'; color: white;">تفعيل المنصة</h2>
-            <input type="text" id="code-input" class="code-input" placeholder="كود التفعيل" maxlength="12">
-            <button id="btn-activate" class="activate-btn" onclick="verifyCode()">دخول</button>
-            <p id="msg" style="color: var(--danger); font-size: 0.8rem; margin-top: 10px; min-height: 1.2em;"></p>
+    <!-- 1. شاشة الحماية (Protection Layer) -->
+    <div id="protection-screen">
+        <div class="login-card">
+            <div style="margin-bottom: 20px; filter: drop-shadow(0 0 10px rgba(212,175,55,0.5));">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="#d4af37"><path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6-9h-1V6a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zM9 6a3 3 0 1 1 6 0v2H9V6z"/></svg>
+            </div>
+            <h2 class="login-title">أكاديمية الدكتور شويدرة</h2>
+            <p class="login-subtitle">نظام التربية الإسلامية الرابع متوسط</p>
+            
+            <input type="text" id="access-code" class="code-input" placeholder="أدخل كود التفعيل" maxlength="15">
+            <button id="btn-unlock" class="btn-verify" onclick="verifyCode()">تحقق ودخول</button>
+            
+            <div id="lock-msg" class="status-msg"></div>
         </div>
-    </section>
+    </div>
 
     <div class="ticker">
         <div class="ticker-text">
@@ -317,6 +350,11 @@
                 <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
             </div>
             <h3>امتحان نموذجي (20 نقطة)</h3>
+        </div>
+
+        <!-- زر إعادة التعيين -->
+        <div class="reset-btn-container">
+            <button class="reset-btn" onclick="clearActivation()">مسح الذاكرة وتسجيل الخروج</button>
         </div>
     </div>
 
@@ -406,9 +444,15 @@
         // ==========================================
         // 1. منطق الحماية وبصمة الجهاز (متصل بـ API)
         // ==========================================
-        // تأكد أن العمود في جدول Google Sheets اسمه "code"
-        // إذا كان اسم العمود مختلف، غيّر كلمة "code" في الرابط أدناه
         const API_URL = 'https://sheetdb.io/api/v1/q69au3ajbl4o9/search?code=';
+
+        // دالة لمسح الذاكرة (للاختبار أو إعادة التعيين)
+        function clearActivation() {
+            localStorage.removeItem('bem_activated');
+            localStorage.removeItem('bem_activation_code');
+            localStorage.removeItem('device_fp');
+            location.reload();
+        }
 
         function getDeviceFingerprint() {
             let fp = localStorage.getItem('device_fp');
@@ -423,17 +467,17 @@
             getDeviceFingerprint(); 
             const isActivated = localStorage.getItem('bem_activated') === 'true';
             if(isActivated) {
-                document.getElementById('activation-screen').classList.add('hidden');
+                document.getElementById('protection-screen').classList.add('hidden');
             }
         };
 
         // دالة التحقق الحقيقية عبر SheetDB
         async function verifyCode() {
-            const input = document.getElementById('code-input').value.trim();
-            const btn = document.getElementById('btn-activate');
-            const msg = document.getElementById('msg');
+            const input = document.getElementById('access-code').value.trim();
+            const btn = document.getElementById('btn-unlock');
+            const msg = document.getElementById('lock-msg');
             
-            if(!input) { msg.textContent = "أدخل الكود"; return; }
+            if(!input) { msg.textContent = "يرجى إدخال الكود"; msg.style.color = "var(--danger)"; return; }
             
             btn.disabled = true; 
             btn.textContent = "جاري التحقق...";
@@ -441,40 +485,29 @@
             msg.textContent = "جاري الاتصال بالسيرفر...";
 
             try {
-                // الاتصال بالـ API للبحث عن الكود
                 const response = await fetch(`${API_URL}${input}`);
-                
-                if (!response.ok) {
-                    throw new Error("خطأ في الشبكة");
-                }
-
+                if (!response.ok) throw new Error("خطأ في الشبكة");
                 const data = await response.json();
 
-                // SheetDB يعيد مصفوفة، إذا كانت غير فارغة فهذا يعني أن الكود موجود
                 if (data.length > 0) {
-                    // التفعيل الناجح
                     localStorage.setItem('bem_activation_code', input);
                     localStorage.setItem('bem_activated', 'true');
-                    
                     msg.style.color = "var(--success)";
                     msg.textContent = "تم التفعيل بنجاح!";
-                    
                     setTimeout(() => {
-                        document.getElementById('activation-screen').classList.add('hidden');
+                        document.getElementById('protection-screen').classList.add('hidden');
                         btn.disabled = false; 
-                        btn.textContent = "دخول";
+                        btn.textContent = "تحقق ودخول";
                     }, 1000);
                 } else {
-                    // الكود غير موجود
-                    throw new Error("الكود غير صحيح");
+                    throw new Error("الكود غير صحيح أو غير موجود");
                 }
-
             } catch (error) {
                 console.error(error);
                 msg.style.color = "var(--danger)";
-                msg.textContent = error.message || "حدث خطأ ما";
+                msg.textContent = error.message || "حدث خطأ ما، حاول مرة أخرى";
                 btn.disabled = false;
-                btn.textContent = "دخول";
+                btn.textContent = "تحقق ودخول";
             }
         }
 
@@ -485,7 +518,7 @@
             quran: [
                 {q:"ما هو المعنى المقصود بـ (النبأ العظيم) في سورة النبأ؟", o:["البعث والنشور","أخبار الدنيا","نزول القرآن"], a:"البعث والنشور"},
                 {q:"لماذا شبه الله الجبال بالأوتاد؟", o:["لأنها تثبت الأرض","لأنها عالية جداً","لأنها مظللة"], a:"لأنها تثبت الأرض"},
-                {q:"ما معنى 'سراجاً وهاجاً'؟", o:["الشمس المضيئة","القمر المنير","النار"], a:"الشمس المضيئة"},
+                {q:"ما معنى 'سراجاً وهاجا'؟", o:["الشمس المضيئة","القمر المنير","النار"], a:"الشمس المضيئة"},
                 {q:"الغاية من خلق الناس شعوباً وقبائل:", o:["التعارف","التفاخر","التقاتل"], a:"التعارف"},
                 {q:"ما معنى 'ألفافاً' في سورة النبأ؟", o:["ملتزمة بعضها ببعض","مختلفة","عالية"], a:"ملتزمة بعضها ببعض"},
                 {q:"من السور التي تبدأ بـ 'تبارك'؟", o:["سورة الملك","سورة النبأ","سورة القيامة"], a:"سورة الملك"},
@@ -732,7 +765,6 @@
 
         /* --- الامتحان النموذجي --- */
         function generateMockExam() {
-            // دمج جميع الأسئلة من الفئات
             let allQuestions = [
                 ...MASTER_DB.quran, 
                 ...MASTER_DB.hadith, 
@@ -741,10 +773,7 @@
                 ...MASTER_DB.aqida,
                 ...MASTER_DB.values
             ];
-            
-            // خلط عشوائي عميق للتقليل من التكرار
             allQuestions.sort(() => Math.random() - 0.5);
-            
             let examQuestions = allQuestions.slice(0, 20);
             document.getElementById('exam-modal').style.display = 'flex';
             document.getElementById('result-overlay').style.display = 'none';
@@ -757,18 +786,13 @@
             questions.forEach((q, index) => {
                 const qBlock = document.createElement('div');
                 qBlock.className = 'exam-q-block';
-                qBlock.dataset.correct = q.a; // تخزين الجواب الصحيح في الخاصية
-                
+                qBlock.dataset.correct = q.a; 
                 qBlock.innerHTML = `<span class="q-text-exam">${index+1}. ${q.q}</span>`;
                 const ul = document.createElement('ul');
                 ul.className = 'exam-options';
-                
-                // خلط الخيارات لكل سؤال
                 [...q.o].sort(() => Math.random() - 0.5).forEach(opt => {
                     const li = document.createElement('li');
-                    // استخدام index الفريد لضمان عدم تشابك الـ Radios
                     const uniqueId = `exam_q${index}_opt${opt.replace(/\s/g,'')}`;
-                    
                     li.innerHTML = `
                         <input type="radio" name="exam_q_${index}" id="${uniqueId}" value="${opt}">
                         <label class="opt-label" for="${uniqueId}"><span class="opt-circle"></span>${opt}</label>
@@ -783,15 +807,10 @@
         function correctExam() {
             const qBlocks = document.querySelectorAll('.exam-q-block');
             let score = 0;
-            
             qBlocks.forEach(block => {
-                // البحث عن الإجابة المختارة داخل هذا البلوك فقط
                 const selectedInput = block.querySelector('input[type="radio"]:checked');
                 const correctAnswer = block.dataset.correct;
-                
-                // إزالة كلاسات التصحيح السابقة
                 block.classList.remove('correct-answer', 'wrong-answer');
-                
                 if(selectedInput) {
                     if(selectedInput.value === correctAnswer) { 
                         score++; 
@@ -803,7 +822,6 @@
                     block.classList.add('wrong-answer'); 
                 }
             });
-            
             const finalScore = (score / 20) * 20;
             document.getElementById('final-score').innerText = finalScore.toFixed(2) + "/20";
             const remark = finalScore >= 16 ? "ممتاز" : finalScore >= 12 ? "جيد جداً" : finalScore >= 10 ? "متوسط" : "ضعيف";
