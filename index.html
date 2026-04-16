@@ -100,7 +100,7 @@
         }
         .reset-btn:hover { background: var(--danger); color: white; }
 
-        /* --- شاشة الحماية --- */
+        /* --- شاشة الحماية (تم تحسين التصميم) --- */
         #protection-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000000; 
@@ -230,13 +230,16 @@
     <!-- 1. شاشة الحماية -->
     <div id="protection-screen">
         <div class="login-card">
-            <div style="margin-bottom: 20px; filter: drop-shadow(0 0 10px rgba(212,175,55,0.5));">
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="#d4af37"><path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6-9h-1V6a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zM9 6a3 3 0 1 1 6 0v2H9V6z"/></svg>
+            <!-- أيقونة القفل المحسنة -->
+            <div style="margin-bottom: 20px; filter: drop-shadow(0 0 15px rgba(212,175,55,0.6));">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="#d4af37">
+                    <path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6-9h-1V6a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zM9 6a3 3 0 1 1 6 0v2H9V6z"/>
+                </svg>
             </div>
-            <h2 class="login-title">ادخل كود التفعيل </h2>
-            <p class="login-subtitle"> التربية الإسلامية الرابع متوسط</p>
+            <h2 class="login-title">ادخل كود التفعيل</h2>
+            <p class="login-subtitle">التربية الإسلامية الرابعة متوسط</p>
             
-            <input type="text" id="access-code" class="code-input" placeholder="أدخل كود التفعيل" maxlength="15">
+            <input type="text" id="access-code" class="code-input" placeholder="الكود هنا" maxlength="15">
             <button id="btn-unlock" class="btn-verify" onclick="verifyCode()">تحقق ودخول</button>
             
             <div id="lock-msg" class="status-msg"></div>
@@ -404,10 +407,12 @@
         const API_BASE_URL = 'https://sheetdb.io/api/v1/q69au3ajbl4o9'; 
 
         function clearActivation() {
-            localStorage.removeItem('bem_activated');
-            localStorage.removeItem('bem_activation_code');
-            localStorage.removeItem('device_fp');
-            location.reload();
+            if(confirm('هل أنت متأكد من مسح التفعيل؟ سيتم طلب الكود مرة أخرى.')) {
+                localStorage.removeItem('bem_activated');
+                localStorage.removeItem('bem_activation_code');
+                localStorage.removeItem('device_fp');
+                location.reload();
+            }
         }
 
         function getDeviceFingerprint() {
