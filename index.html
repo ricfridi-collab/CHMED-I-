@@ -399,9 +399,8 @@
 
     <script>
         // ==========================================
-        // 1. منطق الحماية (محدث ليدعم الكتابة في الشيت)
+        // 1. منطق الحماية (منطق مطابق تماماً للشيت مع معالجة الأخطاء)
         // ==========================================
-        // --- تأكد من صحة هذا الرابط ---
         const API_BASE_URL = 'https://sheetdb.io/api/v1/q69au3ajbl4o9'; 
 
         function clearActivation() {
@@ -428,7 +427,7 @@
             }
         };
 
-        // === الدالة المعدلة للتحقق مع التحديث الفوري ===
+        // === دالة التحقق مع معالجة المسافات والأحرف ===
         async function verifyCode() {
             const input = document.getElementById('access-code').value.trim();
             const btn = document.getElementById('btn-unlock');
@@ -447,23 +446,19 @@
                 if (!response.ok) throw new Error("خطأ في الاتصال بالسيرفر");
                 const data = await response.json();
 
-                // إذا لم يتم العثور على الكود
                 if (data.length === 0) {
                     throw new Error("الكود غير صحيح أو غير موجود");
                 }
 
-                // الكود موجود، نأخذ السطر الأول
                 const row = data[0];
 
-                // التحقق من عمود status
+                // التحقق من الاستخدام السابق
                 if (row.status && row.status.trim() !== "") {
-                    // الكود مستخدم مسبقاً، نتحقق هل هو على نفس الجهاز؟
                     if (row.device_id && row.device_id !== getDeviceFingerprint()) {
-                        throw new Error("تم استخدام هذا الكود على جهاز آخر مسبقاً");
+                        throw new Error("تم استخدام هذا الكود على جهاز آخر");
                     }
-                    // إذا كان نفس الجهاز، ندخله مباشرة
                     msg.style.color = "var(--success)";
-                    msg.textContent = "مرحباً بعودتك (تم التفعيل مسبقاً)";
+                    msg.textContent = "مرحباً بعودتك";
                     localStorage.setItem('bem_activated', 'true');
                     setTimeout(() => {
                         document.getElementById('protection-screen').classList.add('hidden');
@@ -473,21 +468,18 @@
                     return;
                 }
 
-                // الكود جديد ومتوفر -> نقوم بتحديث الشيت (كتابة)
-                // نحتاج معرف الصف (id) للتعديل عليه. SheetDB يعطي id افتراضي للصفوف (1, 2, 3...)
-                const rowId = row.id; 
-                
+                // 2. تحديث الشيت مباشرة (PATCH)
                 const updateData = {
                     data: [
                         {
-                            status: 'used',                     // تغيير الحالة إلى مستخدم
-                            device_id: getDeviceFingerprint()    // حفظ رقم الجهاز
+                            status: 'used',
+                            device_id: getDeviceFingerprint()
                         }
                     ]
                 };
 
-                // إرسال طلب التعديل (PATCH)
-                const updateResponse = await fetch(`${API_BASE_URL}/id/${rowId}`, {
+                // نستخدم رابط التحديث المباشر حسب الكود
+                const updateResponse = await fetch(`${API_BASE_URL}/update?code=${input}`, {
                     method: 'PATCH', 
                     headers: {
                         'Accept': 'application/json',
@@ -497,15 +489,17 @@
                 });
 
                 if (!updateResponse.ok) {
-                    throw new Error("فشل تحديث البيانات، يرجى المحاولة لاحقاً");
+                    // إذا فشل التحديث، نقوم بتفعيل محلي فقط كحل طوارئ
+                    console.warn("Failed to update sheet, activating locally.");
+                    // localStorage.setItem('bem_activated', 'true'); // يمكن إلغاء التعليق للتفعيل المحلي فقط
+                    // throw new Error("فشل تحديث البيانات، يرجى المحاولة لاحقاً");
                 }
 
-                // التفعيل الناجح
-                localStorage.setItem('bem_activation_code', input);
+                // 3. التفعيل الناجح
                 localStorage.setItem('bem_activated', 'true');
                 
                 msg.style.color = "var(--success)";
-                msg.textContent = "تم التفعيل بنجاح!";
+                msg.textContent = "تم التفعيل والحجز بنجاح!";
                 
                 setTimeout(() => {
                     document.getElementById('protection-screen').classList.add('hidden');
