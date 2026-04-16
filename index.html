@@ -91,7 +91,7 @@
         }
         .hidden { display: none !important; }
 
-        /* --- زر إعادة التعيين (للأغراض التقنية) --- */
+        /* --- زر إعادة التعيين --- */
         .reset-btn-container { margin-top: 30px; text-align: center; }
         .reset-btn {
             background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger);
@@ -100,11 +100,11 @@
         }
         .reset-btn:hover { background: var(--danger); color: white; }
 
-        /* --- شاشة الحماية (Protection Screen) --- */
+        /* --- شاشة الحماية --- */
         #protection-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000000; /* أسود صريح لضمان التغطية */
-            z-index: 99999; /* رقم أعلى جداً */
+            background: #000000; 
+            z-index: 99999; 
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             background-image: radial-gradient(circle at center, #1e293b 0%, #000000 100%);
         }
@@ -140,82 +140,43 @@
             margin-top: 15px; font-family: 'Cairo'; font-size: 0.9rem; min-height: 1.5em;
         }
 
-        /* =========================================
-           تنسيقات الكتاب المدرسي (Book Interface)
-           ========================================= */
+        /* تنسيقات الكتاب */
         #book-modal .book-viewer {
-            background: var(--paper-color);
-            color: var(--text-dark);
-            width: 92%; max-width: 600px;
-            border-radius: 5px;
-            padding: 30px 25px;
-            min-height: 80vh;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            font-family: 'Amiri', serif;
-            line-height: 1.8;
-            font-size: 1.2rem;
-            position: relative;
+            background: var(--paper-color); color: var(--text-dark); width: 92%; max-width: 600px;
+            border-radius: 5px; padding: 30px 25px; min-height: 80vh;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5); font-family: 'Amiri', serif;
+            line-height: 1.8; font-size: 1.2rem; position: relative;
         }
-        .chapters-list {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
+        .chapters-list { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .chapter-btn {
-            background: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
+            background: #f1f5f9; border: 1px solid #cbd5e1; padding: 15px;
+            border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s;
         }
         .chapter-btn:hover { background: #e2e8f0; border-color: #94a3b8; }
         .chapter-btn h4 { margin: 0 0 5px 0; color: #334155; font-family: 'Cairo'; }
         .chapter-btn p { margin: 0; font-size: 0.8rem; color: #64748b; font-family: 'Cairo'; }
-        .lesson-header {
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+        .lesson-header { border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
         .lesson-title { color: #b45309; font-weight: bold; font-size: 1.4rem; margin: 0; }
         .lesson-content h3 { color: #b91c1c; margin-top: 20px; border-bottom: 1px solid #ddd; padding-bottom: 5px; font-size: 1.2rem;}
         .lesson-content ul { padding-right: 20px; }
         .lesson-content li { margin-bottom: 8px; }
         .quran-verse {
-            background: #fffbeb;
-            border-right: 4px solid var(--gold);
-            padding: 15px;
-            margin: 20px 0;
-            font-family: 'Amiri', serif;
-            font-size: 1.3rem;
-            color: #92400e;
-            line-height: 2.2;
+            background: #fffbeb; border-right: 4px solid var(--gold); padding: 15px;
+            margin: 20px 0; font-family: 'Amiri', serif; font-size: 1.3rem;
+            color: #92400e; line-height: 2.2;
         }
-        .lesson-nav {
-            display: flex; justify-content: space-between; margin-top: 40px; padding-top: 20px; border-top: 1px dashed #ccc;
-        }
-        .nav-btn {
-            background: #334155; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-family: 'Cairo';
-        }
+        .lesson-nav { display: flex; justify-content: space-between; margin-top: 40px; padding-top: 20px; border-top: 1px dashed #ccc; }
+        .nav-btn { background: #334155; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-family: 'Cairo'; }
         .nav-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
         #book-lesson-content { display: none; } 
         #book-lesson-content.active { display: block; }
         #book-chapters-list.active { display: block; }
         #book-chapters-list { display: none; }
 
-        /* =========================================
-           تنسيقات الامتحان والتمارين
-           ========================================= */
+        /* تنسيقات الامتحان والتمارين */
         .quiz-window {
-            background: rgba(30, 41, 59, 0.9);
-            border: 1px solid var(--gold);
-            width: 90%; max-width: 500px;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
+            background: rgba(30, 41, 59, 0.9); border: 1px solid var(--gold);
+            width: 90%; max-width: 500px; border-radius: 12px; padding: 20px; text-align: center;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
         .penalty-bar { display: flex; justify-content: center; gap: 5px; margin-bottom: 20px; height: 10px; }
@@ -249,7 +210,6 @@
         .opt-circle::after { content: ''; width: 8px; height: 8px; background: white; border-radius: 50%; display: none; }
         .exam-options input[type="radio"]:checked + .opt-label .opt-circle::after { display: block; }
         
-        /* تنسيق التصحيح */
         .exam-q-block.correct-answer { border: 2px solid var(--success); background-color: #f0fdf4; padding: 10px; border-radius: 8px; }
         .exam-q-block.wrong-answer { border: 2px solid var(--danger); background-color: #fef2f2; padding: 10px; border-radius: 8px; }
         .exam-q-block.wrong-answer::after { content: ' الإجابة الصحيحة: ' attr(data-correct); color: var(--danger); font-weight: bold; display: block; margin-top: 5px; font-size: 0.9em; font-family: 'Cairo'; }
@@ -267,7 +227,7 @@
 </head>
 <body>
 
-    <!-- 1. شاشة الحماية (Protection Layer) -->
+    <!-- 1. شاشة الحماية -->
     <div id="protection-screen">
         <div class="login-card">
             <div style="margin-bottom: 20px; filter: drop-shadow(0 0 10px rgba(212,175,55,0.5));">
@@ -375,8 +335,6 @@
     <div id="book-modal" class="modal">
         <div class="book-viewer">
             <button class="btn-back" onclick="closeBook()">⬅ إغلاق الكتاب</button>
-            
-            <!-- قائمة الفصول -->
             <div id="book-chapters-list" class="active">
                 <h2 style="text-align:center; color:#0f172a; margin-top:0;">فهرس الكتاب المدرسي</h2>
                 <div class="chapters-list">
@@ -407,7 +365,6 @@
                 </div>
             </div>
 
-            <!-- عرض الدرس -->
             <div id="book-lesson-content">
                 <div class="lesson-header">
                     <h2 id="lesson-title" class="lesson-title">عنوان الدرس</h2>
@@ -442,11 +399,10 @@
 
     <script>
         // ==========================================
-        // 1. منطق الحماية وبصمة الجهاز (متصل بـ API)
+        // 1. منطق الحماية
         // ==========================================
         const API_URL = 'https://sheetdb.io/api/v1/q69au3ajbl4o9/search?code=';
 
-        // دالة لمسح الذاكرة (للاختبار أو إعادة التعيين)
         function clearActivation() {
             localStorage.removeItem('bem_activated');
             localStorage.removeItem('bem_activation_code');
@@ -471,7 +427,7 @@
             }
         };
 
-        // دالة التحقق الحقيقية عبر SheetDB
+        // === الدالة المعدلة لمنطق التحقق ===
         async function verifyCode() {
             const input = document.getElementById('access-code').value.trim();
             const btn = document.getElementById('btn-unlock');
@@ -486,33 +442,52 @@
 
             try {
                 const response = await fetch(`${API_URL}${input}`);
-                if (!response.ok) throw new Error("خطأ في الشبكة");
+                if (!response.ok) throw new Error("خطأ في الاتصال");
                 const data = await response.json();
 
-                if (data.length > 0) {
-                    localStorage.setItem('bem_activation_code', input);
-                    localStorage.setItem('bem_activated', 'true');
-                    msg.style.color = "var(--success)";
-                    msg.textContent = "تم التفعيل بنجاح!";
-                    setTimeout(() => {
-                        document.getElementById('protection-screen').classList.add('hidden');
-                        btn.disabled = false; 
-                        btn.textContent = "تحقق ودخول";
-                    }, 1000);
-                } else {
+                // إذا لم يتم العثور على الكود
+                if (data.length === 0) {
                     throw new Error("الكود غير صحيح أو غير موجود");
                 }
+
+                // الكود موجود، نأخذ السطر الأول
+                const row = data[0];
+
+                // التحقق من عمود status
+                // إذا كان status فارغاً أو غير موجود، نفترض أن الكود جديد (لم يستخدم)
+                // إذا كان status يحتوي على نص (مثلاً 'used')، نمنعه
+                if (row.status && row.status.trim() !== "") {
+                    throw new Error("تم استخدام هذا الكود من قبل");
+                }
+
+                // التحقق من device_id (اختياري إذا كنت تريد تقييد الكود لجهاز محدد)
+                // هنا سنكتفي بالتحقق من status والتفعيل المحلي
+
+                // التفعيل الناجح
+                localStorage.setItem('bem_activation_code', input);
+                localStorage.setItem('bem_activated', 'true');
+                
+                msg.style.color = "var(--success)";
+                msg.textContent = "تم التفعيل بنجاح!";
+                
+                setTimeout(() => {
+                    document.getElementById('protection-screen').classList.add('hidden');
+                    btn.disabled = false; 
+                    btn.textContent = "تحقق ودخول";
+                }, 1000);
+
             } catch (error) {
                 console.error(error);
                 msg.style.color = "var(--danger)";
-                msg.textContent = error.message || "حدث خطأ ما، حاول مرة أخرى";
+                msg.textContent = error.message || "حدث خطأ غير متوقع";
                 btn.disabled = false;
                 btn.textContent = "تحقق ودخول";
             }
         }
+        // ==========================================
 
         // ==========================================
-        // 2. قاعدة البيانات (محتوى موسع)
+        // 2. قاعدة البيانات
         // ==========================================
         const MASTER_DB = {
             quran: [
@@ -582,7 +557,6 @@
             ]
         };
 
-        // --- قاعدة محتوى الكتاب المدرسي (ملخصات) ---
         const TEXTBOOK_DB = [
             {
                 title: "أولاً: مجال العقيدة",
@@ -601,10 +575,8 @@
                 content: `
                     <h3>سورة الملك (تبارك)</h3>
                     <p>سورة مكية، تدعو للنظر في ملكوت السماوات والأرض، وتقرر وحدانية الله. تسمى (المانعة) لأنها تمنع عذاب القبر.</p>
-                    
                     <h3>سورة النبأ (عمّ)</h3>
                     <p>تحدثت عن البعث والنشور، وأقامت الأدلة على قدرة الله تعالى من خلال خلقه للكون والإنسان.</p>
-                    
                     <h3>أحكام التجويد</h3>
                     <ul>
                         <li><strong>المد:</strong> إطالة الصوت بحرف من حروف المد. منه: المد المتصل والمنفصل والعارض.</li>
@@ -665,20 +637,14 @@
             }
         ];
 
-        // ==========================================
-        // 3. منطق التطبيق
-        // ==========================================
         let currentChapterIndex = 0;
         let sessionPool = []; let currentSet = []; let qIdx = 0; let currentRound = 1; let currentCategory = '';
 
-        /* --- الكتاب --- */
         function openBook() {
             document.getElementById('book-modal').style.display = 'flex';
             showChaptersList();
         }
-        function closeBook() {
-            document.getElementById('book-modal').style.display = 'none';
-        }
+        function closeBook() { document.getElementById('book-modal').style.display = 'none'; }
         function showChaptersList() {
             document.getElementById('book-chapters-list').classList.add('active');
             document.getElementById('book-lesson-content').classList.remove('active');
@@ -701,7 +667,6 @@
             document.getElementById('next-chapter-btn').disabled = (currentChapterIndex === TEXTBOOK_DB.length - 1);
         }
 
-        /* --- التمارين (Quiz) --- */
         function startQuiz(cat) {
             currentCategory = cat;
             sessionPool = [...MASTER_DB[cat]].sort(() => Math.random() - 0.5);
@@ -763,15 +728,10 @@
 
         function closeQuiz() { document.getElementById('modal').style.display = 'none'; }
 
-        /* --- الامتحان النموذجي --- */
         function generateMockExam() {
             let allQuestions = [
-                ...MASTER_DB.quran, 
-                ...MASTER_DB.hadith, 
-                ...MASTER_DB.fiqh, 
-                ...MASTER_DB.sira,
-                ...MASTER_DB.aqida,
-                ...MASTER_DB.values
+                ...MASTER_DB.quran, ...MASTER_DB.hadith, ...MASTER_DB.fiqh, 
+                ...MASTER_DB.sira, ...MASTER_DB.aqida, ...MASTER_DB.values
             ];
             allQuestions.sort(() => Math.random() - 0.5);
             let examQuestions = allQuestions.slice(0, 20);
