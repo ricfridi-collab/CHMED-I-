@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>أكاديمية الدكتور شويدرة | التربية الإسلامية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- تنسيقات الكود الأصلية --- */
+        :root { 
+            --gold: #d4af37; 
+            --gold-dim: rgba(212, 175, 55, 0.7);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --deep-blue: #020617;
+            --glass: rgba(255, 255, 255, 0.05);
+            --card-grad: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            --paper-color: #fdfbf7;
+            --text-dark: #1e293b;
+        }
+
+        body {
+            margin: 0; background: var(--deep-blue); color: white; font-family: 'Amiri', serif;
+            background-image: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            min-height: 100vh; overflow-x: hidden;
+        }
+
+        /* شريط الأخبار المتنقل */
+        .ticker {
+            background: #000; border-bottom: 2px solid var(--gold); padding: 12px 0;
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+        }
+
+        .ticker-text {
+            display: inline-block; white-space: nowrap; animation: scroll 30s linear infinite;
+            color: var(--gold); font-family: 'Cairo'; font-weight: 900; font-size: 0.85rem;
+        }
+
+        @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+
+        /* الحاوية المتجاوبة */
+        .container { 
+            padding: 100px 15px 60px; 
+            max-width: 500px; 
+            width: 90%;
+            margin: 0 auto; 
+        }
+
+        /* البطاقات المخصصة للجوال */
+        .card {
+            background: var(--card-grad); 
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 15px; margin-bottom: 15px; cursor: pointer; 
+            transition: 0.3s; backdrop-filter: blur(10px); 
+            display: flex; flex-direction: column; align-items: center; 
+            padding: 20px 10px; width: 100%; box-sizing: border-box;
+        }
+
+        .card:hover { transform: translateY(-3px); border-color: var(--gold); }
+        .card.exam-card { border-color: rgba(34, 197, 94, 0.4); } /* لون مميز لبطاقة الامتحان */
+
+        .card-icon-wrap { width: 60px; height: 60px; margin-bottom: 12px; filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.3)); }
+        .card-icon-wrap svg { width: 100%; height: 100%; fill: var(--gold); transition: 0.3s; }
+        .card:hover .card-icon-wrap svg { fill: white; }
+        .exam-card .card-icon-wrap svg { fill: var(--success); }
+
+        .card h3 { font-family: 'Cairo'; margin: 0; color: var(--gold); font-size: 1.1rem; text-align: center; }
+        .exam-card h3 { color: var(--success); }
+
+        /* نافذة الاختبار (المودال) */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(2, 6, 23, 0.98); display: none; z-index: 2000;
+            justify-content: center; align-items: flex-start; padding-top: 20px;
+            overflow-y: auto; /* للسماح بالتمرير */
+        }
+
+        .quiz-window { width: 92%; max-width: 450px; padding: 15px; box-sizing: border-box; margin-bottom: 50px;}
+
+        .penalty-bar {
+            display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px;
+            margin-bottom: 15px; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 10px;
+        }
+
+        .ball { height: 6px; background: #334155; border-radius: 3px; }
+        .ball.correct { background: var(--success); box-shadow: 0 0 5px var(--success); }
+        .ball.wrong { background: var(--danger); box-shadow: 0 0 5px var(--danger); }
+
+        .btn-back {
+            background: #000; border: 1px solid var(--gold); color: var(--gold);
+            padding: 8px 15px; border-radius: 8px; font-family: 'Cairo'; cursor: pointer; margin-bottom: 15px;
+        }
+
+        #qCounter { text-align: center; color: var(--gold); margin-bottom: 8px; font-family: 'Cairo'; font-size: 0.9rem; }
+        .question-text { font-size: 1.15rem; text-align: center; margin-bottom: 15px; min-height: 50px; font-weight: bold; line-height: 1.5; }
+
+        .opt-btn {
+            display: block; width: 100%; padding: 12px 15px; margin: 8px 0;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(212, 175, 55, 0.2);
+            color: white; border-radius: 10px; cursor: pointer; text-align: right; 
+            font-family: 'Cairo'; font-size: 1rem; -webkit-tap-highlight-color: transparent;
+        }
+
+        .opt-btn:hover { background: rgba(212, 175, 55, 0.1); border-color: var(--gold); }
+
+        .hidden { display: none !important; }
+
+        /* --- تنسيقات شاشة التفعيل --- */
+        #activation-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(2, 6, 23, 0.98);
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .activation-box {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid var(--gold);
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .code-input {
+            width: 100%; padding: 12px; background: #000; border: 1px solid var(--gold-dim);
+            color: var(--gold); font-size: 1.2rem; text-align: center; border-radius: 8px;
+            margin-bottom: 15px; font-family: 'Cairo', sans-serif; letter-spacing: 2px;
+            direction: ltr; outline: none;
+        }
+        .code-input:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(212,175,55,0.3); }
+
+        .activate-btn {
+            background: var(--gold); color: #000; border: none; padding: 12px;
+            font-weight: bold; cursor: pointer; width: 100%; font-family: 'Cairo', sans-serif;
+            transition: 0.2s; border-radius: 8px; font-size: 1.1rem;
+        }
+        .activate-btn:hover { background: #fff; transform: translateY(-2px); }
+        .activate-btn:disabled { background: #444; color: #888; cursor: not-allowed; transform: none; }
+
+        /* =========================================
+           تنسيقات واجهة الامتحان النموذجي (الجديد)
+           ========================================= */
+        
+        #exam-modal {
+            display: none; /* مخفي افتراضياً */
+            align-items: center; justify-content: center; padding: 10px;
+        }
+
+        .exam-paper {
+            background: var(--paper-color);
+            color: var(--text-dark);
+            width: 100%;
+            max-width: 600px; /* أوسع قليلاً للورقة */
+            border-radius: 5px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            padding: 30px 20px;
+            font-family: 'Amiri', serif;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-top: 5px solid var(--gold);
+        }
+
+        .exam-header {
+            text-align: center;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .exam-header h2 { margin: 0; font-size: 1.5rem; color: #333; }
+        .exam-header p { margin: 5px 0 0; color: #666; font-size: 0.9rem; }
+        
+        .student-info {
+            display: flex; justify-content: space-between; margin-bottom: 20px;
+        }
+        .info-group label { font-weight: bold; font-family: 'Cairo'; margin-left: 5px; }
+        .info-group input {
+            border: none; border-bottom: 1px dotted #333; background: transparent;
+            font-family: 'Cairo'; text-align: center; outline: none; width: 150px;
+        }
+
+        .exam-q-block {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .q-text-exam {
+            font-weight: bold; font-size: 1.1rem; margin-bottom: 12px; display: block;
+        }
+        .q-number { color: var(--gold); font-family: 'Cairo'; font-weight: bold; margin-left: 5px; }
+
+        .exam-options { list-style: none; padding: 0; margin: 0; }
+        .exam-options li { margin-bottom: 8px; cursor: pointer; position: relative; }
+        
+        /* تصميم خيارات الامتحان كـ Radio Buttons مخفية */
+        .exam-options input[type="radio"] { display: none; }
+        
+        .opt-label {
+            display: flex; align-items: center;
+            padding: 8px 12px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: 'Cairo'; font-size: 0.95rem;
+            transition: 0.2s;
+        }
+
+        /* تظليل الخيار عند الاختيار */
+        .exam-options input[type="radio"]:checked + .opt-label {
+            background: #f0fdf4; /* أخضر فاتح جداً */
+            border-color: var(--success);
+        }
+
+        .opt-circle {
+            width: 18px; height: 18px; border: 2px solid #ccc; border-radius: 50%;
+            margin-left: 10px; display: flex; align-items: center; justify-content: center;
+        }
+        .exam-options input[type="radio"]:checked + .opt-label .opt-circle {
+            border-color: var(--success);
+            background: var(--success);
+        }
+        .opt-circle::after {
+            content: ''; width: 8px; height: 8px; background: white; border-radius: 50%;
+            display: none;
+        }
+        .exam-options input[type="radio"]:checked + .opt-label .opt-circle::after { display: block; }
+
+        /* زر تصحيح الامتحان */
+        .submit-exam-btn {
+            display: block; width: 100%; padding: 15px; background: var(--gold); color: #000;
+            border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 1.1rem;
+            cursor: pointer; margin-top: 10px;
+        }
+        .submit-exam-btn:hover { background: #e5c159; }
+
+        /* تنسيقات التصحيح */
+        .exam-q-block.correct-answer .opt-label { background: #dcfce7; border-color: var(--success); color: #064e3b; }
+        .exam-q-block.wrong-answer .opt-label { background: #fee2e2; border-color: var(--danger); color: #7f1d1d; }
+        
+        .correction-text {
+            font-family: 'Cairo'; font-size: 0.85rem; margin-top: 5px; display: none; font-weight: bold;
+        }
+        .wrong-answer .correction-text { display: block; color: var(--danger); }
+
+        /* نافذة النتيجة */
+        .result-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(253, 251, 247, 0.95);
+            z-index: 10;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .score-display { font-size: 3rem; font-weight: 900; color: var(--gold); font-family: 'Cairo'; }
+        .remark-text { font-size: 1.5rem; font-family: 'Amiri'; margin-bottom: 20px; font-weight: bold; }
+        .close-result-btn { padding: 10px 30px; background: #333; color: white; border: none; border-radius: 5px; cursor: pointer; font-family: 'Cairo'; }
+
+    </style>
+</head>
+<body>
+
+    <!-- شاشة التفعيل (الحماية) -->
+    <section id="activation-screen">
+        <div class="activation-box">
+            <svg viewBox="0 0 24 24" width="50" height="50" style="fill: var(--gold); margin-bottom: 20px;">
+                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+            </svg>
+            <h2 style="font-family: 'Cairo'; color: white; margin: 0 0 15px 0;">تفعيل المنصة</h2>
+            <input type="text" id="code-input" class="code-input" placeholder="أدخل كود التفعيل" maxlength="12">
+            <button id="btn-activate" class="activate-btn" onclick="verifyCode()">دخول</button>
+            <p id="msg" style="color: var(--danger); font-size: 0.8rem; margin-top: 15px; min-height: 20px;"></p>
+        </div>
+    </section>
+
+    <div class="ticker">
+        <div class="ticker-text">
+             💎 DESIGNED BY DR. CHOUIDIRA MOHAMED 💎 مراجعة شهادة التعليم المتوسط 2026 💎 دعم حملة جمعية نور سين لتوفير سيارة إسعاف 💎
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card" onclick="startQuiz('quran')">
+            <div class="card-icon-wrap">
+                <svg viewBox="0 0 64 64"><path d="M56 8H40a16.05 16.05 0 0 0-16 16v32a15.91 15.91 0 0 1 15.33-12h16.67zM8 8h16a16.05 16.05 0 0 1 16 16v32a15.91 15.91 0 0 0-15.33-12H8z"/><circle cx="32" cy="18" r="4"/></svg>
+            </div>
+            <h3>القرآن والحديث الشريف</h3>
+        </div>
+        
+        <div class="card" onclick="startQuiz('aqida')">
+            <div class="card-icon-wrap">
+                <svg viewBox="0 0 64 64"><path d="M32 2L2 18v28l30 16 30-16V18zm26 17.65L33 33v24.62l-2-1.07V31.93l-25-13.3V21l25 13.3L58 21z"/></svg>
+            </div>
+            <h3>العقيدة الإسلامية</h3>
+        </div>
+
+        <div class="card" onclick="startQuiz('fiqh')">
+            <div class="card-icon-wrap">
+                <svg viewBox="0 0 64 64"><path d="M58 54h-4V26a22 22 0 0 0-44 0v28H6v4h52zm-38 0h-4v-8h4zm16 0h-4a8 8 0 0 1-8-8V26a10 10 0 0 1 20 0v20a8 8 0 0 1-8 8z"/></svg>
+            </div>
+            <h3>الفقه والقيم المالية</h3>
+        </div>
+
+        <div class="card" onclick="startQuiz('sira')">
+            <div class="card-icon-wrap">
+                <svg viewBox="0 0 64 64"><path d="M40 2L32 12l-8-10zM24 14l8-2 8 2v10H24zm22 12H18v36h28z"/></svg>
+            </div>
+            <h3>السيرة والقصص</h3>
+        </div>
+
+        <!-- بطاقة الامتحان النموذجي الجديدة -->
+        <div class="card exam-card" onclick="generateMockExam()">
+            <div class="card-icon-wrap">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+            </div>
+            <h3>امتحان نموذجي (20 نقطة)</h3>
+        </div>
+    </div>
+
+    <!-- مودال الاختبار العادي -->
+    <div id="modal" class="modal">
+        <div class="quiz-window">
+            <button class="btn-back" onclick="closeQuiz()">⬅ إغلاق</button>
+            <div id="penaltyBar" class="penalty-bar"></div>
+            <div id="qContent">
+                <div id="qCounter"></div>
+                <p id="qText" class="question-text"></p>
+                <div id="options"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال الامتحان النموذجي (الورقة) -->
+    <div id="exam-modal" class="modal">
+        <div class="exam-paper">
+            <div class="exam-header">
+                <h2>امتحان تجريبي في التربية الإسلامية</h2>
+                <p>شهادة التعليم المتوسط - BEM 2026</p>
+            </div>
+            
+            <div class="student-info">
+                <div class="info-group">
+                    <label>الاسم واللقب:</label>
+                    <input type="text" placeholder=".........................">
+                </div>
+                <div class="info-group">
+                    <label>المدة:</label>
+                    <input type="text" value="غير محددة" readonly style="width: 80px;">
+                </div>
+            </div>
+
+            <form id="exam-form">
+                <!-- سيتم توليد الأسئلة هنا -->
+                <div id="exam-questions-container"></div>
+            </form>
+
+            <button type="button" class="submit-exam-btn" onclick="correctExam()">تصحيح ورقة الامتحان</button>
+            <button type="button" style="background:transparent; border:none; color:#888; margin-top:10px; display:block; width:100%; text-decoration:underline; cursor:pointer;" onclick="closeExam()">إلغاء والعودة</button>
+
+            <!-- شاشة النتيجة الداخلية -->
+            <div id="result-overlay" class="result-overlay">
+                <div>النقطة المُحصّلة</div>
+                <div id="final-score" class="score-display">00/20</div>
+                <div id="final-remark" class="remark-text">ممتاز</div>
+                <button class="close-result-btn" onclick="closeResultOverlay()">مشاهدة التصحيح</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. منطق الحماية والتفعيل
+        // ==========================================
+        const API_URL = 'https://sheetdb.io/api/v1/q69au3ajbl4o9';
+        const DEV_MODE = false;
+
+        window.onload = () => {
+            // --- ⚠️ هذا السطر لمسح الذاكرة لتجربة الكود فقط (احذفه عند النشر النهائي) ---
+            localStorage.removeItem('bem_activated'); 
+            // ---------------------------------------------------------------------
+
+            if(localStorage.getItem('bem_activated') === 'true' || DEV_MODE) {
+                document.getElementById('activation-screen').classList.add('hidden');
+            }
+        };
+
+        async function verifyCode() {
+            const input = document.getElementById('code-input').value.trim();
+            const btn = document.getElementById('btn-activate');
+            const msg = document.getElementById('msg');
+
+            if(!input) { msg.textContent = "الرجاء إدخال الكود"; return; }
+
+            btn.disabled = true;
+            btn.textContent = "جاري التحقق...";
+
+            let deviceId = localStorage.getItem('device_id');
+            if(!deviceId) {
+                deviceId = Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('device_id', deviceId);
+            }
+
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                const found = data.find(item => item.code && item.code.trim() === input);
+
+                if(found) {
+                    if(found.status === "Active") {
+                        if(found.device_id && found.device_id !== deviceId) {
+                            msg.textContent = "عذراً، هذا الكود مستخدم بالفعل على جهاز آخر!";
+                            btn.disabled = false;
+                            btn.textContent = "دخول";
+                            return;
+                        }
+                        localStorage.setItem('bem_activated', 'true');
+                        document.getElementById('activation-screen').classList.add('hidden');
+                    } else {
+                        await activateCode(input, deviceId);
+                    }
+                } else {
+                    msg.textContent = "الكود غير صحيح";
+                    btn.disabled = false;
+                    btn.textContent = "دخول";
+                }
+
+            } catch(e) {
+                console.error(e);
+                msg.textContent = "خطأ في الاتصال بالخادم. تأكد من الإنترنت.";
+                btn.disabled = false;
+                btn.textContent = "دخول";
+            }
+        }
+
+        async function activateCode(code, deviceId) {
+            try {
+                await fetch(API_URL + '/code/' + code, {
+                    method: 'PATCH',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ "data": { "status": "Active", "device_id": deviceId } })
+                });
+
+                localStorage.setItem('bem_activated', 'true');
+                document.getElementById('activation-screen').classList.add('hidden');
+            } catch(e) {
+                console.warn("Activation API failed, activating locally.");
+                document.getElementById('msg').textContent = "تم التفعيل (وضع تجريبي)";
+                localStorage.setItem('bem_activated', 'true');
+                setTimeout(() => {
+                    document.getElementById('activation-screen').classList.add('hidden');
+                }, 1000);
+            }
+        }
+
+        // ==========================================
+        // 2. قاعدة البيانات
+        // ==========================================
+        const MASTER_DB = {
+            quran: [
+                {q:"ما معنى 'النبأ العظيم' في سورة النبأ؟", o:["البعث بعد الموت","أخبار قريش","نزول المطر"], a:"البعث بعد الموت"},
+                {q:"قال تعالى: 'والجبال أوتادا'؛ شبهت بالأوتاد لأنها:", o:["تثبت الأرض","منظرها جميل","تسقط منها الأنهار"], a:"تثبت الأرض"},
+                {q:"معنى 'سراجاً وهاجاً' في سورة النبأ هو:", o:["الشمس المضيئة","القمر المنير","النجوم البعيدة"], a:"الشمس المضيئة"},
+                {q:"الغاية من تنوع الشعوب والقبائل في سورة الحجرات هي:", o:["التعارف","التفاخر بالأنساب","الحروب"], a:"التعارف"},
+                {q:"معنى كلمة 'ألفافاً' في سورة النبأ:", o:["بساتين ملتفة الأشجار","جبال عالية","رمال ناعمة"], a:"بساتين ملتفة الأشجار"},
+                {q:"المراد بـ 'المعصرات' في سورة النبأ:", o:["السحب الممطرة","الرياح القوية","الأرض القاحلة"], a:"السحب الممطرة"},
+                {q:"ما معنى كلمة 'ثجاجاً'؟", o:["منصباً بكثرة","قليلاً جداً","بارداً كالثلج"], a:"منصباً بكثرة"},
+                {q:"قال تعالى 'وجعلنا نومكم سباتاً'؛ السبات هو:", o:["راحة لأبدانكم","موتاً مؤقتاً","حركة مستمرة"], a:"راحة لأبدانكم"},
+                {q:"المراد بكلمة 'الصور' في سورة النبأ:", o:["البوق الذي ينفخ فيه","الصور الفوتوغرافية","المرآة"], a:"البوق الذي ينفخ فيه"},
+                {q:"ما معنى كلمة 'أحقاباً'؟", o:["أزماناً طويلة لا نهاية لها","سنة واحدة","يوماً واحداً"], a:"أزماناً طويلة لا نهاية لها"}
+            ],
+            aqida: [
+                {q:"الإيمان باليوم الآخر هو الركن الـ ... من أركان الإيمان:", o:["الخامس","الرابع","السادس"], a:"الخامس"},
+                {q:"الملك الموكل بالنفخ في الصور هو:", o:["إسرافيل","جبريل","ميكائيل"], a:"إسرافيل"},
+                {q:"ما معنى الإيمان بالقضاء والقدر؟", o:["التسليم بعلم الله المسبق للأشياء","ترك العمل والانتظار","توقع الحظ"], a:"التسليم بعلم الله المسبق للأشياء"},
+                {q:"الوقوف بعرفة هو الركن ... في الحج:", o:["الأعظم","الثانوي","المستحب"], a:"الأعظم"},
+                {q:"أعلى مراتب الدين هي:", o:["الإحسان","الإسلام","الإيمان"], a:"الإحسان"},
+                {q:"من ثمرات الإيمان باليوم الآخر:", o:["الاستقامة في السلوك","الخوف واليأس","حب الدنيا"], a:"الاستقامة في السلوك"},
+                {q:"توحيد الألوهية هو إفراد الله بـ:", o:["العبادة","الخلق والرزق","الأسماء والصفات"], a:"العبادة"},
+                {q:"ما هي الكلمة التي تعتبر مفتاح الجنة؟", o:["لا إله إلا الله","الحمد لله","أستغفر الله"], a:"لا إله إلا الله"},
+                {q:"الفرق بين التوكل والتواكل هو أن التوكل يكون بـ:", o:["الأخذ بالأسباب","ترك العمل","الاعتماد على النفس فقط"], a:"الأخذ بالأسباب"},
+                {q:"أول أركان الإيمان هو:", o:["الإيمان بالله","الإيمان بالرسل","الإيمان بالكتب"], a:"الإيمان بالله"}
+            ],
+            fiqh: [
+                {q:"ما هي نسبة زكاة الأموال إذا بلغت النصاب وحال عليها الحول؟", o:["2.5% (ربع العشر)","5% (نصف العشر)","10%"], a:"2.5% (ربع العشر)"},
+                {q:"حكم 'الإجارة' في الإسلام:", o:["جائزة ومشروعة بالكتاب والسنة","محرمة","مكروهة"], a:"جائزة ومشروعة بالكتاب والسنة"},
+                {q:"قال ﷺ: 'أعطوا الأجير أجره قبل أن...' ؟", o:["يجف عرقه","ينتهي يومه","يطلب حقه"], a:"يجف عرقه"},
+                {q:"من مخاطر الغش والاحتكار في المجتمع:", o:["ظلم الفقراء وفساد الاقتصاد","زيادة الأرباح الحلال","إسعاد الناس"], a:"ظلم الفقراء وفساد الاقتصاد"},
+                {q:"بر الوالدين واجب:", o:["في حياتهما وبعد مماتهما","في حياتهما فقط","عند الحاجة فقط"], a:"في حياتهما وبعد مماتهما"},
+                {q:"صلة الرحم تعني الإحسان إلى:", o:["الأقارب من جهة الأب والأم","الجيران فقط","الأصدقاء"], a:"الأقارب من جهة الأب والأم"},
+                {q:"أدنى شعب الإيمان هي:", o:["إماطة الأذى عن الطريق","الصلاة","الصدقة"], a:"إماطة الأذى عن الطريق"},
+                {q:"آداب الاستئذان أن يطرق الباب:", o:["ثلاثاً فإن لم يؤذن له يرجع","مرة واحدة","عشر مرات"], a:"ثلاثاً فإن لم يؤذن له يرجع"},
+                {q:"من آداب المسلم في أسرته:", o:["الرفق والمودة والتشاور","التسلط والعنف","إفشاء الأسرار"], a:"الرفق والمودة والتشاور"},
+                {q:"الجار الذي له حقان هو:", o:["الجار المسلم (حق الجوار وحق الإسلام)","الجار الكافر","الجار القريب"], a:"الجار المسلم (حق الجوار وحق الإسلام)"}
+            ],
+            sira: [
+                {q:"في أي سنة هجرية كان فتح مكة؟", o:["8 هـ","6 هـ","10 هـ"], a:"8 هـ"},
+                {q:"ما هو اللقب الذي أطلق على عثمان بن عفان؟", o:["ذو النورين","الصديق","الفاروق"], a:"ذو النورين"},
+                {q:"من هم 'أولو العزم' من الرسل؟", o:["نوح وإبراهيم وموسى وعيسى ومحمد","الخلفاء الأربعة","المبشرون بالجنة"], a:"نوح وإبراهيم وموسى وعيسى ومحمد"},
+                {q:"موقف النبي ﷺ 'اذهبوا فأنتم الطلقاء' يدل على:", o:["العفو والتسامح عند المقدرة","الخوف من المشركين","الرغبة في المال"], a:"العفو والتسامح عند المقدرة"},
+                {q:"أين توفي النبي صلى الله عليه وسلم؟", o:["في بيت عائشة بالمدينة المنورة","في مكة المكرمة","في الطائف"], a:"في بيت عائشة بالمدينة المنورة"},
+                {q:"الصحابي الذي استخلفه النبي للصلاة بالناس أثناء مرضه هو:", o:["أبو بكر الصديق","عمر بن الخطاب","علي بن أبي طالب"], a:"أبو بكر الصديق"},
+                {q:"من أهم وصايا النبي في حجة الوداع:", o:["استوصوا بالنساء خيراً والصلاة","طلب الثأر","جمع المال"], a:"استوصوا بالنساء خيراً والصلاة"},
+                {q:"الخليفة الذي أسس علم النحو ونظم الشرطة هو:", o:["علي بن أبي طالب","أبو بكر الصديق","عثمان بن عفان"], a:"علي بن أبي طالب"},
+                {q:"كم دامت خلافة أبي بكر الصديق رضي الله عنه؟", o:["سنتان وبضعة أشهر","عشر سنوات","خمس سنوات"], a:"سنتان وبضعة أشهر"},
+                {q:"الصحابي الذي لُقب بـ 'الفاروق' هو:", o:["عمر بن الخطاب","عثمان بن عفان","أبو بكر"], a:"عمر بن الخطاب"}
+            ]
+        };
+
+        // ==========================================
+        // 3. منطق الاختبار العادي
+        // ==========================================
+        let sessionPool = []; 
+        let currentSet = [];  
+        let qIdx = 0;
+        let currentRound = 1;
+        let currentCategory = '';
+
+        function startQuiz(cat) {
+            currentCategory = cat;
+            sessionPool = [...MASTER_DB[cat]].sort(() => Math.random() - 0.5);
+            currentRound = 1;
+            launchNextRound();
+        }
+
+        function launchNextRound() {
+            currentSet = sessionPool.splice(0, 20); 
+            qIdx = 0;
+            
+            document.getElementById('modal').style.display = 'flex';
+            resetUI();
+            showQuestion();
+        }
+
+        function resetUI() {
+            const bar = document.getElementById('penaltyBar');
+            bar.innerHTML = '';
+            for(let i=0; i < 20; i++) {
+                let dot = document.createElement('div');
+                dot.className = 'ball'; 
+                dot.id = 'ball-' + i;
+                bar.appendChild(dot);
+            }
+        }
+
+        function showQuestion() {
+            const q = currentSet[qIdx];
+            
+            document.getElementById('qCounter').innerHTML = `
+                <span style="color: #d4af37;">🏆 الجولة: ${currentRound} من 5</span> | 
+                السؤال: ${qIdx + 1} من 20
+            `;
+            
+            document.getElementById('qText').innerText = q.q;
+            
+            const optDiv = document.getElementById('options');
+            optDiv.innerHTML = '';
+            
+            let shuffledOptions = [...q.o].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'opt-btn'; 
+                btn.innerText = opt;
+                
+                btn.onclick = () => {
+                    const isCorrect = (opt === q.a);
+                    const ball = document.getElementById('ball-' + qIdx);
+                    
+                    if(isCorrect) {
+                        ball.classList.add('correct');
+                    } else {
+                        ball.classList.add('wrong');
+                        alert("للأسف إجابة خاطئة!\nالجواب الصحيح هو: " + q.a);
+                    }
+                    
+                    qIdx++;
+                    
+                    if(qIdx < 20) {
+                        setTimeout(showQuestion, 250); 
+                    } else {
+                        checkEndOfRound();
+                    }
+                };
+                optDiv.appendChild(btn);
+            });
+        }
+
+        function checkEndOfRound() {
+            if (currentRound < 5) {
+                alert(`أحسنت يا بطل! أنهيت الجولة رقم ${currentRound}.\nاضغط موافق لبدء الجولة التالية (20 سؤالاً جديداً).`);
+                currentRound++;
+                launchNextRound(); 
+            } else {
+                alert("🎉 مبروك  لقد ختمت الميدان كاملاً (100 سؤال) في 5 جولات بنجاح.");
+                closeQuiz();
+            }
+        }
+
+        function closeQuiz() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // ==========================================
+        // 4. منطق الامتحان النموذجي (الجديد)
+        // ==========================================
+        
+        // دالة لتوليد الامتحان
+        function generateMockExam() {
+            // 1. دمج جميع الأسئلة من كل التصنيفات
+            let allQuestions = [
+                ...MASTER_DB.quran, 
+                ...MASTER_DB.aqida, 
+                ...MASTER_DB.fiqh, 
+                ...MASTER_DB.sira
+            ];
+
+            // 2. خلط الأسئلة عشوائياً
+            allQuestions.sort(() => Math.random() - 0.5);
+
+            // 3. اختيار أول 20 سؤال (لضمان عدم التكرار داخل الورقة)
+            let examQuestions = allQuestions.slice(0, 20);
+
+            // 4. عرض الواجهة
+            document.getElementById('exam-modal').style.display = 'flex';
+            document.getElementById('result-overlay').style.display = 'none';
+            document.querySelector('.exam-paper').scrollTop = 0; // العودة لأعلى الصفحة
+            
+            // 5. بناء محتوى الورقة
+            renderExamPaper(examQuestions);
+        }
+
+        function renderExamPaper(questions) {
+            const container = document.getElementById('exam-questions-container');
+            container.innerHTML = '';
+
+            questions.forEach((q, index) => {
+                const qBlock = document.createElement('div');
+                qBlock.className = 'exam-q-block';
+                qBlock.dataset.correct = q.a; // تخزين الإجابة الصحيحة في العنصر
+
+                const qTitle = document.createElement('span');
+                qTitle.className = 'q-text-exam';
+                qTitle.innerHTML = `<span class="q-number">${index + 1}.</span> ${q.q}`;
+                qBlock.appendChild(qTitle);
+
+                const ul = document.createElement('ul');
+                ul.className = 'exam-options';
+
+                // خلط الخيارات لكل سؤال
+                let shuffledOpts = [...q.o].sort(() => Math.random() - 0.5);
+
+                shuffledOpts.forEach(opt => {
+                    const li = document.createElement('li');
+                    
+                    const inputId = `q${index}_opt_${opt}`; // معرف فريد
+                    
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = `q_${index}`; // نفس المجموعة لنفس السؤال
+                    radio.id = inputId;
+                    radio.value = opt;
+
+                    const label = document.createElement('label');
+                    label.className = 'opt-label';
+                    label.htmlFor = inputId;
+
+                    const circle = document.createElement('span');
+                    circle.className = 'opt-circle';
+
+                    const text = document.createElement('span');
+                    text.innerText = opt;
+
+                    label.appendChild(circle);
+                    label.appendChild(text);
+                    li.appendChild(radio);
+                    li.appendChild(label);
+                    ul.appendChild(li);
+                });
+
+                // نص التصحيح (يظهر لاحقاً في حالة الخطأ)
+                const correctionText = document.createElement('div');
+                correctionText.className = 'correction-text';
+                correctionText.innerHTML = `الإجابة الصحيحة: ${q.a}`;
+                qBlock.appendChild(correctionText);
+
+                qBlock.appendChild(ul);
+                container.appendChild(qBlock);
+            });
+        }
+
+        function correctExam() {
+            // التأكد من أن جميع الأسئلة أجيب عليها
+            const qBlocks = document.querySelectorAll('.exam-q-block');
+            let answeredCount = 0;
+            let score = 0;
+            const totalQuestions = 20;
+            const pointsPerQ = 20 / totalQuestions; // 20 نقطة على 20 سؤال = نقطة واحدة لكل سؤال
+
+            // إعادة تعيين الحالات السابقة
+            qBlocks.forEach(block => {
+                block.classList.remove('correct-answer', 'wrong-answer');
+            });
+
+            qBlocks.forEach(block => {
+                const selectedInput = block.querySelector('input[type="radio"]:checked');
+                const correctAnswer = block.dataset.correct;
+                const correctionDiv = block.querySelector('.correction-text');
+
+                if (!selectedInput) {
+                    // إذا لم يتم اختيار إجابة، تعتبر خاطئة ولكن لا نعطي تنبيهات مزعجة الآن
+                    block.classList.add('wrong-answer');
+                    correctionDiv.innerHTML = `لم تختر إجابة. الصحيح: ${correctAnswer}`;
+                    return; 
+                }
+
+                answeredCount++;
+                const userAnswer = selectedInput.value;
+
+                if (userAnswer === correctAnswer) {
+                    block.classList.add('correct-answer');
+                    score += pointsPerQ;
+                } else {
+                    block.classList.add('wrong-answer');
+                    correctionDiv.innerHTML = `خطأ. الصحيح: ${correctAnswer}`;
+                }
+            });
+
+            if (answeredCount < totalQuestions) {
+                if(!confirm(`لقد أجبت على ${answeredCount} من ${totalQuestions} سؤالاً فقط.\nهل تريد التصحيح anyway؟`)) {
+                    return;
+                }
+            }
+
+            // عرض النتيجة
+            showScoreModal(score);
+        }
+
+        function showScoreModal(score) {
+            const overlay = document.getElementById('result-overlay');
+            const scoreDisplay = document.getElementById('final-score');
+            const remarkDisplay = document.getElementById('final-remark');
+
+            // تنسيق النقطة (تكون أحياناً أرقام عشرية، نقربها إلى منزلتين)
+            let finalScore = score.toFixed(2);
+            scoreDisplay.innerText = `${finalScore} / 20`;
+
+            // تحديد الملاحظة
+            let remark = "";
+            if(score >= 16) remark = "ممتاز 👏";
+            else if(score >= 12) remark = "جيد جداً 👍";
+            else if(score >= 10) remark = "متوسط ✍️";
+            else remark = "ضعيف - عليك بمراجعة الدروس 📚";
+
+            remarkDisplay.innerText = remark;
+            remarkDisplay.style.color = score >= 10 ? "var(--success)" : "var(--danger)";
+
+            overlay.style.display = 'flex';
+        }
+
+        function closeResultOverlay() {
+            document.getElementById('result-overlay').style.display = 'none';
+        }
+
+        function closeExam() {
+            document.getElementById('exam-modal').style.display = 'none';
+        }
+
+    </script>
+</body>
+</html>
